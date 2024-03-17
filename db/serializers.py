@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from db.models import Bus
+from db.models import Bus, Trip
 
 
 # class BusSerializer(serializers.Serializer):
@@ -21,4 +21,14 @@ from db.models import Bus
 class BusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bus
-        fields = ("info", "num_seat", "is_mini")
+        fields = ("id", "info", "num_seat", "is_mini")
+
+
+class TripSerializer(serializers.ModelSerializer):
+    # bus = BusSerializer(many=False, read_only=True) #тільки 1 обьєкт і тільки для відобрачення, але не для створення
+    class Meta:
+        model = Trip
+        fields = ("id", "source", "destination", "departure", "bus")
+
+class TripListSerializer(TripSerializer):
+    bus = BusSerializer(many=False, read_only=True)

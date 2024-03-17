@@ -6,8 +6,8 @@
 # from rest_framework.views import APIView
 from rest_framework import generics, mixins, viewsets
 
-from db.models import Bus
-from db.serializers import BusSerializer
+from db.models import Bus, Trip
+from db.serializers import BusSerializer, TripSerializer, TripListSerializer
 
 
 # _____________func.base view_______@api_view______________________________________
@@ -130,3 +130,13 @@ from db.serializers import BusSerializer
 class BusViewSet(viewsets.ModelViewSet):
     queryset = Bus.objects.all()
     serializer_class = BusSerializer
+
+
+class TripViewSet(viewsets.ModelViewSet):
+    queryset = Trip.objects.all()
+    serializer_class = TripSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return TripListSerializer
+        return TripSerializer
