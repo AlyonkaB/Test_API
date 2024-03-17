@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from db.models import Bus, Trip
+from db.models import Bus, Trip, Facility
 
 
 # class BusSerializer(serializers.Serializer):
@@ -17,11 +17,29 @@ from db.models import Bus, Trip
 #         instance.save()
 #         return instance
 # _________________________________________________________________________________________________________
+class FacilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
+        fields = ("id", "name")
+
 
 class BusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bus
-        fields = ("id", "info", "num_seat", "is_mini")
+        fields = ("id", "info", "num_seat", "is_mini", "facility")
+
+
+class BusListSerializer(BusSerializer):
+    # facility = serializers.StringRelatedField(many=True)
+    facility = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field='name'
+    )
+
+
+class BusDetailSerializer(BusSerializer):
+    facility = FacilitySerializer(many=True, read_only=True)
 
 
 class TripSerializer(serializers.ModelSerializer):
@@ -30,5 +48,15 @@ class TripSerializer(serializers.ModelSerializer):
         model = Trip
         fields = ("id", "source", "destination", "departure", "bus")
 
+
 class TripListSerializer(TripSerializer):
-    bus = BusSerializer(many=False, read_only=True)
+    bus_info = serializers.CharField(source="bus.info", read_only=True)
+    bus_num_seats = serializers.IntegerField(source="bus.num_seat", read_only=True)
+
+    class Meta:
+        model = Trip
+        fields = ("id", "source", "destination", "departure", "bus_info", "bus_num_seats")
+
+
+class TripDetailSerializer(TripSerializer):
+    bus = BusDetailSerializer(many=False, read_only=True)

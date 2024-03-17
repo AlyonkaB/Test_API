@@ -6,8 +6,14 @@
 # from rest_framework.views import APIView
 from rest_framework import generics, mixins, viewsets
 
-from db.models import Bus, Trip
-from db.serializers import BusSerializer, TripSerializer, TripListSerializer
+from db.models import Bus, Trip, Facility
+from db.serializers import (BusSerializer,
+                            TripSerializer,
+                            TripListSerializer,
+                            BusListSerializer,
+                            FacilitySerializer,
+                            BusDetailSerializer, TripDetailSerializer
+                            )
 
 
 # _____________func.base view_______@api_view______________________________________
@@ -125,18 +131,41 @@ from db.serializers import BusSerializer, TripSerializer, TripListSerializer
 #     serializer_class = BusSerializer
 
 # ___________________________ModelViewSet_________________________________________
-
+class FacilityViewSet(viewsets.ModelViewSet):
+    queryset = Facility.objects.all()
+    serializer_class = FacilitySerializer
 
 class BusViewSet(viewsets.ModelViewSet):
     queryset = Bus.objects.all()
     serializer_class = BusSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.prefetch_related("facility")
+        return queryset
+    def get_serializer_class(self):
+        if self.action == "list":
+            return BusListSerializer
+        if self.action == "retrieve":
+            return BusDetailSerializer
+        return BusSerializer
+
 
 class TripViewSet(viewsets.ModelViewSet):
+    # queryset = Trip.objects.all().select_related("bus")  або перевизначаємо метод get_queryset
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        if self.action in ("list", "retrieve"):
+            queryset = queryset.select_related("bus")
+        return queryset
+
     def get_serializer_class(self):
+        if self.action == "retrieve":
+            return TripDetailSerializer
         if self.action == "list":
             return TripListSerializer
         return TripSerializer
