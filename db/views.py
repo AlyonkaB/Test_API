@@ -139,11 +139,20 @@ class BusViewSet(viewsets.ModelViewSet):
     queryset = Bus.objects.all()
     serializer_class = BusSerializer
 
+    @staticmethod
+    def _param_to_ints(query_string) -> list:
+        return [int(str_id) for str_id in query_string.split(",")]
+
     def get_queryset(self):
         queryset = self.queryset
+        facilities = self.request.query_params.get("facilities")
+        if facilities:
+            facilities = self._param_to_ints(facilities)
+            queryset = queryset.filter(facility__id__in=facilities)
         if self.action in ("list", "retrieve"):
             queryset = queryset.prefetch_related("facility")
-        return queryset
+        return queryset.distinct()
+
     def get_serializer_class(self):
         if self.action == "list":
             return BusListSerializer
