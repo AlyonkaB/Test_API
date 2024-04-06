@@ -3,6 +3,7 @@ from django.contrib import admin
 from db.models import Bus, Facility, Trip, Order, Ticket
 
 
+
 class TicketInLine(admin.TabularInline):
     model = Ticket
     extra = 1

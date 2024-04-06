@@ -6,13 +6,13 @@
 # from rest_framework.views import APIView
 from rest_framework import generics, mixins, viewsets
 
-from db.models import Bus, Trip, Facility
+from db.models import Bus, Trip, Facility, Order
 from db.serializers import (BusSerializer,
                             TripSerializer,
                             TripListSerializer,
                             BusListSerializer,
                             FacilitySerializer,
-                            BusDetailSerializer, TripDetailSerializer
+                            BusDetailSerializer, TripDetailSerializer, OrderSerializer
                             )
 
 
@@ -169,3 +169,14 @@ class TripViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return TripListSerializer
         return TripSerializer
+
+
+class OrderViewSer(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

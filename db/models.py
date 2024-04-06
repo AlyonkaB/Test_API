@@ -6,7 +6,7 @@ from Test_Api import settings
 
 
 class Facility(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
 
     class Meta:
         verbose_name_plural = "facilities"
@@ -49,7 +49,7 @@ class Trip(models.Model):
 class Ticket(models.Model):
     seat = models.IntegerField()
     trip = models.ForeignKey("Trip", on_delete=models.CASCADE)
-    order = models.ForeignKey("Order", on_delete=models.CASCADE)
+    order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
         constraints = [
@@ -59,11 +59,15 @@ class Ticket(models.Model):
     def __str__(self):
         return f"{self.trip} - (seat: {self.seat})"
 
-    def clean(self):
-        if not(1<= self.seat <= self.trip.bus.num_seat):
-            raise ValidationError({
-                "seat": f"seat be in range [1, {self.trip.bus.num_seat}], not {self.seat}"
+    @staticmethod
+    def validate_seat(seat: int, num_seat: int, error_to_raise):
+        if not (1 <= seat <= num_seat):
+            raise error_to_raise({
+                "seat": f"seat be in range [1, {num_seat}], not {seat}"
             })
+
+    def clean(self):
+        Ticket.validate_seat(self.seat, self.trip.bus.num_seat, ValueError)
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
