@@ -5,6 +5,7 @@ from django.db.models import Count, F
 # from rest_framework.response import Response
 # from rest_framework.views import APIView
 from rest_framework import generics, mixins, viewsets
+from rest_framework.pagination import PageNumberPagination
 
 from db.models import Bus, Trip, Facility, Order
 from db.serializers import (BusSerializer,
@@ -12,7 +13,10 @@ from db.serializers import (BusSerializer,
                             TripListSerializer,
                             BusListSerializer,
                             FacilitySerializer,
-                            BusDetailSerializer, TripDetailSerializer, OrderSerializer
+                            BusDetailSerializer,
+                            TripDetailSerializer,
+                            OrderSerializer,
+                            OrderListSerializers
                             )
 
 
@@ -190,12 +194,27 @@ class TripViewSet(viewsets.ModelViewSet):
         return TripSerializer
 
 
+class OrderSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class OrderViewSer(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    pagination_class = OrderSetPagination
+    def get_serializer_class(self):
+        serializer = self.serializer_class
+        if self.action == "list":
+            serializer = OrderListSerializers
+        return serializer
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        queryset = self.queryset.filter(user=self.request.user)
+        if self.action == "list":
+            queryset = self.queryset.prefetch_related("tickets__trip__bus")
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
