@@ -1,5 +1,5 @@
 # from django.http import Http404
-
+from django.db.models import Count, F
 # from rest_framework import status
 # from rest_framework.decorators import api_view
 # from rest_framework.response import Response
@@ -168,9 +168,19 @@ class TripViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        if self.action in ("list", "retrieve"):
-            queryset = queryset.select_related("bus")
-        return queryset
+        if self.action in "list":
+            queryset = (
+                queryset
+                .select_related()
+                .annotate(
+                    tickets_available=(
+                        F("bus__num_seat") - Count("tickets")
+                    )
+                )
+            )
+        elif self.action in "retrieve":
+            queryset = queryset.select_related()
+        return queryset.order_by("id")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
