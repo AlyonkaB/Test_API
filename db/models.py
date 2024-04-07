@@ -48,14 +48,14 @@ class Trip(models.Model):
 
 class Ticket(models.Model):
     seat = models.IntegerField()
-    trip = models.ForeignKey("Trip", on_delete=models.CASCADE)
+    trip = models.ForeignKey("Trip", on_delete=models.CASCADE, related_name="tickets")
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
         constraints = [
             UniqueConstraint(fields=["seat", "trip"], name="unique_ticket_seat_trip")
         ]
-
+        ordering = ["seat"]
     def __str__(self):
         return f"{self.trip} - (seat: {self.seat})"
 

@@ -60,10 +60,6 @@ class TripListSerializer(TripSerializer):
         fields = ("id", "source", "destination", "departure", "bus_info", "bus_num_seats")
 
 
-class TripDetailSerializer(TripSerializer):
-    bus = BusDetailSerializer(many=False, read_only=True)
-
-
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
@@ -81,11 +77,24 @@ class TicketSerializer(serializers.ModelSerializer):
             attrs["trip"].bus.num_seat,
             serializers.ValidationError
         )
-
         # if not(1 <= attrs["seat"] <= attrs["trip"].bus.num_seat):
         #     raise serializers.ValidationError({
         #         "seat": f"seat be in range [1, {attrs['trip'].bus.num_seat}], not {attrs['seat']}"
         #     })
+
+
+class TripDetailSerializer(TripSerializer):
+    bus = BusDetailSerializer(many=False, read_only=True)
+    taken_seats = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="seat",
+        source="tickets"
+    )
+
+    class Meta:
+        model = Trip
+        fields = ("id", "source", "destination", "departure", "bus", "taken_seats")
 
 
 class OrderSerializer(serializers.ModelSerializer):
