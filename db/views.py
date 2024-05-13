@@ -5,12 +5,9 @@ from django.db.models import Count, F
 # from rest_framework.response import Response
 # from rest_framework.views import APIView
 from rest_framework import generics, mixins, viewsets
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from db.models import Bus, Trip, Facility, Order
-from db.permissions import IsAdminAllOrIsAuthenticatedReadOnly
 from db.serializers import (BusSerializer,
                             TripSerializer,
                             TripListSerializer,
@@ -141,15 +138,6 @@ from db.serializers import (BusSerializer,
 class FacilityViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()
     serializer_class = FacilitySerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAdminAllOrIsAuthenticatedReadOnly,)
-    # permission_classes = (IsAdminUser,)
-
-    # def get_permissions(self):
-    #     if self.action in ("list", "retrieve"):
-    #         return (IsAuthenticated(),)
-    #     return super().get_permissions()
-
 
 class BusViewSet(viewsets.ModelViewSet):
     queryset = Bus.objects.all()
