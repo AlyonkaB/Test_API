@@ -1,6 +1,10 @@
+import pathlib
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import UniqueConstraint
+from django.utils.text import slugify
 
 from Test_Api import settings
 
@@ -14,10 +18,17 @@ class Facility(models.Model):
     def __str__(self):
         return self.name
 
+
+def bus_image_path(instance: "Bus", filename: str) -> pathlib.Path:
+    filename = f"{slugify(instance.info)}-{uuid.uuid4()}" + pathlib.Path(filename).suffix
+    return pathlib.Path("upload/buses/") / pathlib.Path(filename)
+
+
 class Bus(models.Model):
     info = models.CharField(max_length=255)
     num_seat = models.IntegerField()
     facility = models.ManyToManyField(Facility, related_name="bases")
+    image = models.ImageField(null=True, upload_to=bus_image_path)
 
     class Meta:
         verbose_name_plural = "buses"
