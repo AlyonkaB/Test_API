@@ -28,7 +28,7 @@ class FacilitySerializer(serializers.ModelSerializer):
 class BusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bus
-        fields = ("id", "info", "num_seat", "is_mini", "facility")
+        fields = ("id", "info", "num_seat", "is_mini", "facility", "image")
 
 
 class BusListSerializer(BusSerializer):
@@ -42,6 +42,12 @@ class BusListSerializer(BusSerializer):
 
 class BusDetailSerializer(BusSerializer):
     facility = FacilitySerializer(many=True, read_only=True)
+
+
+class BusImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bus
+        fields = ("id", "image")
 
 
 class TripSerializer(serializers.ModelSerializer):
