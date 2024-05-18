@@ -1,11 +1,7 @@
 from django.urls import path, include
+
 # from db.views import BusList, BusDetail
-from db.views import (
-    BusViewSet,
-    TripViewSet,
-    FacilityViewSet,
-    OrderViewSer
-)
+from db.views import BusViewSet, TripViewSet, FacilityViewSet, OrderViewSer
 from rest_framework import routers
 
 router = routers.DefaultRouter()

@@ -34,9 +34,7 @@ class BusSerializer(serializers.ModelSerializer):
 class BusListSerializer(BusSerializer):
     # facility = serializers.StringRelatedField(many=True)
     facility = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field='name'
+        many=True, read_only=True, slug_field="name"
     )
 
 
@@ -60,7 +58,7 @@ class TripSerializer(serializers.ModelSerializer):
 class TripListSerializer(TripSerializer):
     bus_info = serializers.CharField(source="bus.info", read_only=True)
     bus_num_seats = serializers.IntegerField(source="bus.num_seat", read_only=True)
-    tickets_available = serializers.IntegerField( read_only=True)
+    tickets_available = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Trip
@@ -71,7 +69,7 @@ class TripListSerializer(TripSerializer):
             "departure",
             "bus_info",
             "bus_num_seats",
-            "tickets_available"
+            "tickets_available",
         )
 
 
@@ -81,16 +79,13 @@ class TicketSerializer(serializers.ModelSerializer):
         fields = ("id", "seat", "trip")
         validators = [
             UniqueTogetherValidator(
-                queryset=Ticket.objects.all(),
-                fields=['seat', 'trip']
+                queryset=Ticket.objects.all(), fields=["seat", "trip"]
             )
         ]
 
     def validate(self, attrs) -> None:
         Ticket.validate_seat(
-            attrs["seat"],
-            attrs["trip"].bus.num_seat,
-            serializers.ValidationError
+            attrs["seat"], attrs["trip"].bus.num_seat, serializers.ValidationError
         )
         # if not(1 <= attrs["seat"] <= attrs["trip"].bus.num_seat):
         #     raise serializers.ValidationError({
@@ -101,10 +96,7 @@ class TicketSerializer(serializers.ModelSerializer):
 class TripDetailSerializer(TripSerializer):
     bus = BusDetailSerializer(many=False, read_only=True)
     taken_seats = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field="seat",
-        source="tickets"
+        many=True, read_only=True, slug_field="seat", source="tickets"
     )
 
     class Meta:
@@ -121,7 +113,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         with transaction.atomic():
-            tickets_data = validated_data.pop('tickets')
+            tickets_data = validated_data.pop("tickets")
             order = Order.objects.create(**validated_data)
             for ticket_data in tickets_data:
                 Ticket.objects.create(order=order, **ticket_data)
@@ -134,4 +126,3 @@ class TicketsListSerializers(TicketSerializer):
 
 class OrderListSerializers(OrderSerializer):
     tickets = TicketsListSerializers(read_only=True, many=True)
-

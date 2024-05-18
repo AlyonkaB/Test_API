@@ -20,7 +20,9 @@ class Facility(models.Model):
 
 
 def bus_image_path(instance: "Bus", filename: str) -> pathlib.Path:
-    filename = f"{slugify(instance.info)}-{uuid.uuid4()}" + pathlib.Path(filename).suffix
+    filename = (
+        f"{slugify(instance.info)}-{uuid.uuid4()}" + pathlib.Path(filename).suffix
+    )
     return pathlib.Path("upload/buses/") / pathlib.Path(filename)
 
 
@@ -50,7 +52,7 @@ class Trip(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["source", "destination"]),
-            models.Index(fields=["departure"])
+            models.Index(fields=["departure"]),
         ]
 
     def __str__(self) -> str:
@@ -67,15 +69,16 @@ class Ticket(models.Model):
             UniqueConstraint(fields=["seat", "trip"], name="unique_ticket_seat_trip")
         ]
         ordering = ["seat"]
+
     def __str__(self):
         return f"{self.trip} - (seat: {self.seat})"
 
     @staticmethod
     def validate_seat(seat: int, num_seat: int, error_to_raise):
         if not (1 <= seat <= num_seat):
-            raise error_to_raise({
-                "seat": f"seat be in range [1, {num_seat}], not {seat}"
-            })
+            raise error_to_raise(
+                {"seat": f"seat be in range [1, {num_seat}], not {seat}"}
+            )
 
     def clean(self):
         Ticket.validate_seat(self.seat, self.trip.bus.num_seat, ValueError)
@@ -84,10 +87,12 @@ class Ticket(models.Model):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         self.full_clean()
-        return super(Ticket, self).save(force_insert, force_update, using, update_fields)
+        return super(Ticket, self).save(
+            force_insert, force_update, using, update_fields
+        )
 
 
-class Order(models. Model):
+class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 

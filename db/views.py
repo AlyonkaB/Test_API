@@ -1,5 +1,6 @@
 # from django.http import Http404
 from django.db.models import Count, F
+
 # from rest_framework import status
 # from rest_framework.decorators import api_view
 # from rest_framework.response import Response
@@ -13,16 +14,18 @@ from rest_framework.response import Response
 
 from db.models import Bus, Trip, Facility, Order
 from db.permissions import IsAdminAllOrIsAuthenticatedReadOnly
-from db.serializers import (BusSerializer,
-                            TripSerializer,
-                            TripListSerializer,
-                            BusListSerializer,
-                            FacilitySerializer,
-                            BusDetailSerializer,
-                            TripDetailSerializer,
-                            OrderSerializer,
-                            OrderListSerializers, BusImageSerializer
-                            )
+from db.serializers import (
+    BusSerializer,
+    TripSerializer,
+    TripListSerializer,
+    BusListSerializer,
+    FacilitySerializer,
+    BusDetailSerializer,
+    TripDetailSerializer,
+    OrderSerializer,
+    OrderListSerializers,
+    BusImageSerializer,
+)
 
 
 # _____________func.base view_______@api_view______________________________________
@@ -139,6 +142,7 @@ from db.serializers import (BusSerializer,
 #     queryset = Bus.objects.all()
 #     serializer_class = BusSerializer
 
+
 # ___________________________ModelViewSet_________________________________________
 class FacilityViewSet(viewsets.ModelViewSet):
     queryset = Facility.objects.all()
@@ -184,7 +188,7 @@ class BusViewSet(viewsets.ModelViewSet):
         methods=["POST"],
         detail=True,
         permission_classes=[IsAdminUser],
-        url_path="upload-image"
+        url_path="upload-image",
     )
     def upload_image(self, request, pk=None):
         bus = self.get_object()
@@ -203,14 +207,8 @@ class TripViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
         if self.action in "list":
-            queryset = (
-                queryset
-                .select_related()
-                .annotate(
-                    tickets_available=(
-                        F("bus__num_seat") - Count("tickets")
-                    )
-                )
+            queryset = queryset.select_related().annotate(
+                tickets_available=(F("bus__num_seat") - Count("tickets"))
             )
         elif self.action in "retrieve":
             queryset = queryset.select_related()
@@ -226,7 +224,7 @@ class TripViewSet(viewsets.ModelViewSet):
 
 class OrderSetPagination(PageNumberPagination):
     page_size = 5
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = 100
 
 
@@ -234,6 +232,7 @@ class OrderViewSer(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = OrderSetPagination
+
     def get_serializer_class(self):
         serializer = self.serializer_class
         if self.action == "list":
