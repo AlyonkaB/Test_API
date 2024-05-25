@@ -17,7 +17,6 @@ class UserSerializer(serializers.ModelSerializer):
             }
         }
 
-
     def create(self, validated_data):
         """CREATE user with encrypted password"""
         return get_user_model().objects.create_user(**validated_data)
